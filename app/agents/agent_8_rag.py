@@ -1,4 +1,7 @@
 import os
+import ast
+import re
+from google import genai
 
 class RAGAgent:
     """
@@ -18,18 +21,13 @@ class RAGAgent:
         )
         
         try:
-            import litellm
-            import ast
-            model_name = os.getenv("MODEL_NAME", "ollama/deepseek-r1:8b")
-            response = litellm.completion(
-                model=model_name,
-                messages=[{"role": "user", "content": prompt}],
-                api_base=os.getenv("OLLAMA_API_BASE", "http://localhost:11434"),
-                timeout=5.0
+            client = genai.Client()
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
             )
-            content = response.choices[0].message.content.strip()
+            content = response.text.strip()
             # Attempt to safely parse a list from the LLM response
-            import re
             match = re.search(r'\[.*\]', content, re.DOTALL)
             if match:
                 return ast.literal_eval(match.group(0))

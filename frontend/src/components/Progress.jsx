@@ -20,7 +20,11 @@ const Progress = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-brand-secondary">Loading academic progress...</div>;
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh] gap-4 text-brand-secondary">
+        <l-chaotic-orbit size="35" speed="1.5" color="#1e40af"></l-chaotic-orbit>
+      </div>
+    );
   }
 
   if (error) {

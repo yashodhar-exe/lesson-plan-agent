@@ -24,7 +24,7 @@ class TimetableAgent:
         ]
 
     @staticmethod
-    def import_timetable(db: Session, file_path: str, mime_type: str = "application/pdf", default_course_id: str = None):
+    def import_timetable(db: Session, file_path: str, mime_type: str = "application/pdf", default_course_id: str = None, default_faculty_id: str = None):
         """
         Parses a timetable file using Gemini and inserts/updates slots in the database.
         """
@@ -71,6 +71,8 @@ class TimetableAgent:
                 faculty = db.query(models.Faculty).filter(models.Faculty.name.ilike(f"%{faculty_name}%")).first()
                 if faculty:
                     faculty_id = faculty.id
+            if not faculty_id and default_faculty_id:
+                faculty_id = default_faculty_id
 
             if section and course:
                 new_slot = models.TimetableSlot(

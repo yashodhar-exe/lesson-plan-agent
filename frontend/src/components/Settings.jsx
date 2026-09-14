@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Settings = () => {
+const Settings = ({ faculty, session }) => {
+  const [lastUpdated, setLastUpdated] = useState(() => 
+    new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+  );
+
+  const handleSave = () => {
+    setLastUpdated(new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }));
+  };
   return (
     <div className="w-full h-full relative">
       {/* Main Workspace Content */}
@@ -19,22 +26,19 @@ const Settings = () => {
             <div className="flex items-center justify-between pb-4 border-b border-brand-border mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-brand-text">Profile &amp; Account Information</h2>
-                <p className="text-sm text-brand-secondary">Synced with the Autonomous University Registrar &amp; HRMS Records</p>
               </div>
-              <span className="px-2.5 py-1 bg-brand-surface border border-brand-border rounded text-xs text-brand-secondary flex items-center gap-1 font-medium">
-                <span className="material-symbols-outlined text-brand-primary" style={{ fontSize: '0.95rem' }}>lock</span>
-                Verified Academic Credential
-              </span>
             </div>
             
             <div className="flex flex-col md:flex-row gap-6 items-start">
               {/* Faculty Portrait Frame & Secondary Action */}
               <div className="flex flex-col items-center gap-2 w-full md:w-44 flex-shrink-0">
                 <div className="w-32 h-32 rounded-lg border border-brand-border bg-brand-surface flex flex-col items-center justify-center text-brand-primary relative overflow-hidden">
-                  <span className="text-2xl font-semibold tracking-wider">AS</span>
+                  <span className="text-2xl font-semibold tracking-wider">
+                    {faculty?.name ? faculty.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'F'}
+                  </span>
                   <span className="text-xs text-brand-secondary mt-1 font-semibold uppercase tracking-widest">Faculty ID</span>
                 </div>
-                <button className="text-sm text-brand-primary hover:underline flex items-center gap-1 font-medium mt-1" type="button">
+                <button className="text-sm text-brand-primary flex items-center gap-1 font-medium mt-1" type="button">
                   <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>photo_camera</span>
                   <span>Update Photo</span>
                 </button>
@@ -45,27 +49,27 @@ const Settings = () => {
                 {/* Name */}
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Faculty Name</label>
-                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value="Dr. A. R. Sharma" />
+                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value={faculty?.name || "Faculty Member"} />
                 </div>
                 {/* Designation */}
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Designation</label>
-                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value="Professor &amp; Senior Research Mentor" />
+                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value={faculty?.designation || "Professor"} />
                 </div>
                 {/* Department */}
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Department</label>
-                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value="Computer Science &amp; Engineering" />
+                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value={faculty?.department || "Computer Science"} />
                 </div>
                 {/* Institutional Email */}
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Institutional Email</label>
-                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="email" value="a.r.sharma@vignan.edu" />
+                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="email" value={session?.user?.email || "faculty@example.com"} />
                 </div>
                 {/* Employee ID */}
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Employee ID</label>
-                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg font-mono text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value="FAC-CSE-2014-089" />
+                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg font-mono text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value={faculty?.id ? `FAC-${faculty.id.substring(0,8).toUpperCase()}` : "N/A"} />
                 </div>
                 {/* Academic Affiliation */}
                 <div className="flex flex-col">
@@ -75,17 +79,6 @@ const Settings = () => {
               </div>
             </div>
             
-            {/* Bottom Notice & Action */}
-            <div className="mt-6 pt-4 border-t border-brand-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm">
-              <div className="flex items-center gap-2 text-brand-secondary">
-                <span className="material-symbols-outlined text-brand-secondary" style={{ fontSize: '1.1rem' }}>info</span>
-                <span>Institutional identity details are locked to Registrar HRMS records.</span>
-              </div>
-              <button className="text-brand-primary font-medium hover:underline flex items-center gap-1" type="button">
-                <span>Request Data Correction</span>
-                <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>open_in_new</span>
-              </button>
-            </div>
           </section>
 
           {/* SECTION 2: ACADEMIC PREFERENCES */}
@@ -237,96 +230,7 @@ const Settings = () => {
             </div>
           </section>
 
-          {/* SECTION 4: SYSTEM APPEARANCE */}
-          <section className="bg-white border border-brand-border rounded-lg p-6 shadow-none">
-            <div className="pb-4 border-b border-brand-border mb-6">
-              <h2 className="text-xl font-semibold text-brand-text">System Appearance &amp; Interface</h2>
-              <p className="text-sm text-brand-secondary mt-1">Select interface presentation modes and typographical scaling for prolonged academic review sessions.</p>
-            </div>
-            <div className="space-y-6">
-              {/* Theme Selection Cards */}
-              <div>
-                <span className="text-base font-medium text-brand-text block mb-3">Color Mode</span>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Card 1: System Default (Selected) */}
-                  <div className="relative rounded-lg border-2 border-brand-primary bg-brand-surface p-4 cursor-pointer flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-brand-text">System Default</span>
-                        <span className="w-5 h-5 rounded-full bg-brand-primary flex items-center justify-center text-white">
-                          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check</span>
-                        </span>
-                      </div>
-                      <div className="h-16 rounded border border-brand-border bg-gray-50 flex overflow-hidden">
-                        <div className="w-1/4 bg-brand-surface border-r border-brand-border"></div>
-                        <div className="w-3/4 p-1.5 space-y-1">
-                          <div className="h-2 w-12 bg-brand-primary rounded-sm"></div>
-                          <div className="h-1.5 w-full bg-gray-200 rounded-sm"></div>
-                          <div className="h-1.5 w-4/5 bg-gray-200 rounded-sm"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold text-brand-secondary mt-3 block">Follows operational OS theme schedule</span>
-                  </div>
-                  {/* Card 2: Light Mode */}
-                  <div className="relative rounded-lg border border-brand-border bg-white p-4 hover:border-brand-primary cursor-pointer transition-colors flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-brand-text">Light</span>
-                      </div>
-                      <div className="h-16 rounded border border-brand-border bg-white flex overflow-hidden">
-                        <div className="w-1/4 bg-brand-surface border-r border-brand-border"></div>
-                        <div className="w-3/4 p-1.5 space-y-1">
-                          <div className="h-2 w-10 bg-brand-border rounded-sm"></div>
-                          <div className="h-1.5 w-full bg-gray-200 rounded-sm"></div>
-                          <div className="h-1.5 w-3/4 bg-gray-200 rounded-sm"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold text-brand-secondary mt-3 block">High-contrast academic print layout</span>
-                  </div>
-                  {/* Card 3: Dark Mode */}
-                  <div className="relative rounded-lg border border-brand-border bg-white p-4 hover:border-brand-primary cursor-pointer transition-colors flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-brand-text">Dark</span>
-                      </div>
-                      <div className="h-16 rounded border border-gray-700 bg-gray-900 flex overflow-hidden">
-                        <div className="w-1/4 bg-gray-800 border-r border-gray-700"></div>
-                        <div className="w-3/4 p-1.5 space-y-1">
-                          <div className="h-2 w-10 bg-blue-400 rounded-sm"></div>
-                          <div className="h-1.5 w-full bg-gray-600 rounded-sm"></div>
-                          <div className="h-1.5 w-3/4 bg-gray-600 rounded-sm"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold text-brand-secondary mt-3 block">Restrained dark slate for evening analysis</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="h-px bg-brand-border"></div>
-              
-              {/* Font Density / Scale */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-base font-medium text-brand-text block">Font Density &amp; Typography Scale</span>
-                  <span className="text-sm text-brand-secondary">Adjust interface scale for multi-column syllabus matrices.</span>
-                </div>
-                <div className="inline-flex rounded-lg border border-brand-border p-1 bg-brand-surface">
-                  <button className="px-3 py-1.5 text-sm text-brand-secondary hover:text-brand-text rounded transition-colors" type="button">
-                    Compact (13px)
-                  </button>
-                  <button className="px-3 py-1.5 text-sm font-medium bg-white text-brand-primary shadow-sm border border-brand-border rounded" type="button">
-                    Comfortable (Standard)
-                  </button>
-                  <button className="px-3 py-1.5 text-sm text-brand-secondary hover:text-brand-text rounded transition-colors" type="button">
-                    Spacious (16px)
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
+
 
         </div>
       </div>
@@ -336,13 +240,17 @@ const Settings = () => {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm text-brand-secondary">
             <span className="material-symbols-outlined text-brand-primary" style={{ fontSize: '1.1rem' }}>sync</span>
-            <span>Last updated: Oct 18, 2026 · Synced with Autonomous Faculty Registry</span>
+            <span>Last updated: {lastUpdated}</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="px-4 py-2 border border-brand-border rounded-lg text-sm font-medium text-brand-secondary hover:bg-brand-surface hover:text-brand-text transition-colors" type="button">
               Discard Changes
             </button>
-            <button className="px-5 py-2 bg-brand-primary hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-none flex items-center gap-1.5" type="button">
+            <button 
+              onClick={handleSave}
+              className="px-5 py-2 bg-brand-primary hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-none flex items-center gap-1.5" 
+              type="button"
+            >
               <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>save</span>
               <span>Save Configurations</span>
             </button>

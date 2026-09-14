@@ -1,11 +1,11 @@
 # Agent 5 - Lesson Plan Agent
 
-This is the backend for the Agentic AI Hackathon project, specifically implementing Agent 5 (Lesson Plan Agent) and Agent 6 (Variance Agent) using Google ADK, FastAPI, PostgreSQL, and Ollama.
+This is the backend for the Agentic AI Hackathon project, specifically implementing Agent 5 (Lesson Plan Agent) and Agent 6 (Variance Agent) using Google ADK, FastAPI, PostgreSQL, and Gemini API.
 
 ## Architecture
 - **Framework:** FastAPI
-- **Agent Framework:** Google ADK (Agent Development Kit) with `litellm`
-- **LLM Engine:** Local Ollama (`deepseek-r1:8b`)
+- **Agent Framework:** Google ADK (Agent Development Kit)
+- **LLM Engine:** Gemini API
 - **Database:** PostgreSQL (with `pgvector` for semantic search / RAG)
 - **Document Parsing:** `pdfplumber` and `pytesseract`
 
@@ -14,7 +14,6 @@ This is the backend for the Agentic AI Hackathon project, specifically implement
 ### 1. Requirements
 - Python 3.10+
 - PostgreSQL server running locally
-- Ollama running locally (`http://localhost:11434`)
 - [Tesseract OCR for Windows](https://github.com/UB-Mannheim/tesseract/wiki) (Install manually if not present, the parser will fall back to mock extraction if it's missing)
 
 ### 2. Database Configuration
@@ -38,13 +37,6 @@ python -m venv venv
 
 # Install requirements (Assuming they are already installed via pyproject.toml)
 pip install .
-```
-
-### 4. Running Ollama
-Ensure the DeepSeek-R1 8B model is pulled and running in Ollama:
-```powershell
-ollama pull deepseek-r1:8b
-ollama run deepseek-r1:8b
 ```
 
 ### 5. Seeding Data

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, UploadFile, File
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import date
 from typing import List, Optional
@@ -102,6 +103,24 @@ def import_timetable(file: UploadFile = File(...), db: Session = Depends(get_db)
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
+class FacultySync(BaseModel):
+    id: str
+    email: str
+    name: str
+
+@app.post("/api/faculty/sync")
+def sync_faculty(faculty_data: FacultySync, db: Session = Depends(get_db)):
+    faculty = db.query(models.Faculty).filter(models.Faculty.id == faculty_data.id).first()
+    if not faculty:
+        faculty = models.Faculty(id=faculty_data.id, email=faculty_data.email, name=faculty_data.name)
+        db.add(faculty)
+    else:
+        faculty.email = faculty_data.email
+        faculty.name = faculty_data.name
+    db.commit()
+    db.refresh(faculty)
+    return {"id": faculty.id, "name": faculty.name, "email": faculty.email}
+
 @app.get("/api/faculty/{faculty_id}")
 def get_faculty(faculty_id: str, db: Session = Depends(get_db)):
     faculty = db.query(models.Faculty).filter(models.Faculty.id == faculty_id).first()
@@ -177,6 +196,13 @@ def get_faculty_workload(faculty_id: str, db: Session = Depends(get_db)):
         "sections": section_reports,
         "next_class": next_class
     }
+
+@app.get("/api/faculty/{faculty_id}/courses")
+def get_faculty_courses(faculty_id: str, db: Session = Depends(get_db)):
+    slots = db.query(models.TimetableSlot).filter(models.TimetableSlot.faculty_id == faculty_id).all()
+    course_ids = list(set(s.course_id for s in slots))
+    courses = db.query(models.Course).filter(models.Course.id.in_(course_ids)).all()
+    return [{"id": c.id, "name": c.name, "code": c.code} for c in courses]
 
 @app.get("/api/courses")
 def get_courses(db: Session = Depends(get_db)):
@@ -461,6 +487,7 @@ def setup_course(
     department: str = Form(...),
     instructor: str = Form(...),
     sections: str = Form(...), # JSON string of section names
+    faculty_id: str = Form(...),
     calendar_file: UploadFile = File(...),
     timetable_file: UploadFile = File(...),
     syllabus_file: UploadFile = File(...),
@@ -479,10 +506,10 @@ def setup_course(
         db.commit()
         db.refresh(course)
     
-    # 2. Get active faculty (Hardcoded facultyId = "1" based on dashboard frontend)
-    faculty = db.query(models.Faculty).filter(models.Faculty.id == "1").first()
+    # 2. Get active faculty
+    faculty = db.query(models.Faculty).filter(models.Faculty.id == faculty_id).first()
     if not faculty:
-        faculty = models.Faculty(id="1", name=instructor, email="faculty@vignan.edu")
+        faculty = models.Faculty(id=faculty_id, name=instructor, email="faculty@vignan.edu")
         db.add(faculty)
         db.commit()
         
@@ -516,7 +543,7 @@ def setup_course(
         # Clear existing timetable slots for this course to prevent duplicates
         db.query(models.TimetableSlot).filter(models.TimetableSlot.course_id == course.id).delete()
         db.commit()
-        TimetableAgent.import_timetable(db, tt_temp, timetable_file.content_type, default_course_id=course.id)
+        TimetableAgent.import_timetable(db, tt_temp, timetable_file.content_type, default_course_id=course.id, default_faculty_id=faculty_id)
     finally:
         if os.path.exists(tt_temp):
             os.remove(tt_temp)
@@ -550,7 +577,10 @@ def setup_course(
     with open(syl_temp, "wb") as buffer:
         shutil.copyfileobj(syllabus_file.file, buffer)
     try:
-        # Clear existing units (and topics due to cascade, if configured, or delete explicitly)
+        # Clear existing topics and units explicitly
+        old_units = db.query(models.Unit).filter(models.Unit.course_id == course.id).all()
+        for u in old_units:
+            db.query(models.Topic).filter(models.Topic.unit_id == u.id).delete()
         db.query(models.Unit).filter(models.Unit.course_id == course.id).delete()
         db.commit()
         

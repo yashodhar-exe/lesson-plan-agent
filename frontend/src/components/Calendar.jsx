@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 
-const Calendar = () => {
+const Calendar = ({ facultyId }) => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // We'll hardcode the current week's dates for the demo, matching the previous UI
-  const days = [
-    { name: "Monday", date: "Oct 19", dayIndex: 1 },
-    { name: "Tuesday", date: "Oct 20", dayIndex: 2 },
-    { name: "Wednesday", date: "Oct 21", dayIndex: 3 },
-    { name: "Thursday", date: "Oct 22", dayIndex: 4 },
-    { name: "Friday", date: "Oct 23", dayIndex: 5 },
-  ];
+  // Generate current week dates
+  const getWeekDates = () => {
+    const curr = new Date();
+    const first = curr.getDate() - curr.getDay() + 1; // First day is Monday
+    return Array.from({ length: 5 }).map((_, i) => {
+      const date = new Date(curr.setDate(first + i));
+      return {
+        name: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i],
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dayIndex: i + 1
+      };
+    });
+  };
+  
+  const days = getWeekDates();
 
   const timeSlots = [
     { period: 1, label: "09:00", ampm: "AM", range: "09:00 - 09:50" },
@@ -24,7 +31,9 @@ const Calendar = () => {
   ];
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/faculty/FAC001/workload')
+    if (!facultyId) return;
+    
+    fetch(`http://localhost:8000/api/faculty/${facultyId}/workload`)
       .then(res => res.json())
       .then(async (workload) => {
          const sections = workload.sections || [];
@@ -106,7 +115,9 @@ const Calendar = () => {
             </div>
 
             {loading ? (
-              <div className="p-8 text-center text-brand-secondary">Loading your live timetable...</div>
+              <div className="p-16 flex flex-col items-center justify-center gap-4 text-brand-secondary">
+                <l-chaotic-orbit size="35" speed="1.5" color="#1e40af"></l-chaotic-orbit>
+              </div>
             ) : sessions.length === 0 ? (
                <div className="p-8 text-center text-brand-secondary">No sessions scheduled for this week. Set up a course to populate your calendar.</div>
             ) : (
@@ -131,9 +142,9 @@ const Calendar = () => {
                         
                         return (
                           <div key={idx} className={`p-2 ${borderClasses} bg-white`}>
-                            <div className={`h-full rounded-xl ${isCompleted ? 'bg-green-50' : 'bg-white border border-brand-border/50 shadow-sm'} p-3 flex flex-col hover:bg-brand-surface/50 transition-colors relative overflow-hidden group/card cursor-pointer`}>
+                            <div className={`h-full rounded-xl ${isCompleted ? 'bg-green-50' : 'bg-white shadow-sm'} p-3 flex flex-col hover:bg-brand-surface/50 transition-colors relative overflow-hidden group/card cursor-pointer`}>
                               <div className="flex justify-between items-start mb-1">
-                                <span className={`text-[10px] font-bold px-1 py-0.5 rounded ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-brand-surface text-brand-primary'}`}>
+                                <span className={`text-[10px] font-bold py-0.5 ${isCompleted ? 'text-green-700' : 'text-brand-primary'}`}>
                                   {sessionMatch.course_id} - {sessionMatch.section_id}
                                 </span>
                                 {isCompleted && <span className="material-symbols-outlined text-[14px] text-green-600">check_circle</span>}

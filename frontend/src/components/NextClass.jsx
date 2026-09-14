@@ -1,6 +1,6 @@
 import React from 'react';
 
-const NextClass = ({ nextClass }) => {
+const NextClass = ({ nextClass, setCurrentView }) => {
   if (!nextClass) {
     return (
       <section className="mb-10">
@@ -38,8 +38,12 @@ const NextClass = ({ nextClass }) => {
           </div>
           {/* Primary single action */}
           <div className="shrink-0 lg:pl-6">
-            <a className="inline-flex items-center gap-1 text-sm font-medium text-brand-primary hover:underline underline-offset-4 transition-all" href="#">
-              <span>View Lesson Plan</span>
+            <a 
+              href="#" 
+              onClick={(e) => { e.preventDefault(); setCurrentView('lesson-plans'); }}
+              className="inline-flex items-center gap-1 text-sm font-medium text-brand-primary group transition-all"
+            >
+              <span className="group-hover:underline underline-offset-4">View Lesson Plan</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </a>
           </div>
