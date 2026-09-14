@@ -12,7 +12,7 @@ const Dashboard = ({ facultyId, faculty, setCurrentView }) => {
       if (!facultyId) return;
       try {
         setLoading(true);
-        const workloadRes = await fetch(`http://localhost:8000/api/faculty/${facultyId}/workload`);
+        const workloadRes = await fetch(`https://lesson-plan-agent.onrender.com/api/faculty/${facultyId}/workload`);
         if (!workloadRes.ok) throw new Error('Failed to fetch data from API');
         const workloadData = await workloadRes.json();
         setWorkload(workloadData);
@@ -38,7 +38,7 @@ const Dashboard = ({ facultyId, faculty, setCurrentView }) => {
           </div>
       ) : error ? (
         <div className="bg-brand-alert/10 text-brand-alert p-4 rounded text-sm border border-brand-alert/20">
-          Error loading data: {error}. Make sure the backend is running on http://localhost:8000.
+          Error loading data: {error}. Make sure the backend is running on https://lesson-plan-agent.onrender.com.
         </div>
       ) : (
         <div className="flex flex-col gap-8 items-start">

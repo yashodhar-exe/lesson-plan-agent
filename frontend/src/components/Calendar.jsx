@@ -33,7 +33,7 @@ const Calendar = ({ facultyId }) => {
   useEffect(() => {
     if (!facultyId) return;
     
-    fetch(`http://localhost:8000/api/faculty/${facultyId}/workload`)
+    fetch(`https://lesson-plan-agent.onrender.com/api/faculty/${facultyId}/workload`)
       .then(res => res.json())
       .then(async (workload) => {
          const sections = workload.sections || [];
@@ -41,7 +41,7 @@ const Calendar = ({ facultyId }) => {
          
          for (const sec of sections) {
              try {
-                const res = await fetch(`http://localhost:8000/api/lesson-plans/search?course_id=${sec.course_id}&section_id=${sec.section_id}`);
+                const res = await fetch(`https://lesson-plan-agent.onrender.com/api/lesson-plans/search?course_id=${sec.course_id}&section_id=${sec.section_id}`);
                 const data = await res.json();
                 if (data && data.sessions) {
                     const mapped = data.sessions.map(s => {

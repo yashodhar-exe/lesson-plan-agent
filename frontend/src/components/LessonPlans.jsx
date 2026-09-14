@@ -12,7 +12,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
   useEffect(() => {
     if (!facultyId) return;
     // Fetch courses for specific faculty
-    fetch(`http://localhost:8000/api/faculty/${facultyId}/courses`)
+    fetch(`https://lesson-plan-agent.onrender.com/api/faculty/${facultyId}/courses`)
       .then(res => res.json())
       .then(data => {
         setCourses(data);
@@ -23,7 +23,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
 
   useEffect(() => {
     if (!selectedCourse) return;
-    fetch(`http://localhost:8000/api/courses/${selectedCourse}/sections`)
+    fetch(`https://lesson-plan-agent.onrender.com/api/courses/${selectedCourse}/sections`)
       .then(res => res.json())
       .then(data => {
         setSections(data);
@@ -40,7 +40,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
     }
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:8000/api/lesson-plans/search?course_id=${selectedCourse}&section_id=${selectedSection}`)
+    fetch(`https://lesson-plan-agent.onrender.com/api/lesson-plans/search?course_id=${selectedCourse}&section_id=${selectedSection}`)
       .then(res => {
         if (!res.ok) throw new Error("Plan not found for this section.");
         return res.json();

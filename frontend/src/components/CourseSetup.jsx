@@ -79,7 +79,7 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
       payload.append('timetable_file', files.timetable);
       payload.append('syllabus_file', files.syllabus);
 
-      const response = await fetch('http://localhost:8000/api/setup-course', {
+      const response = await fetch('https://lesson-plan-agent.onrender.com/api/setup-course', {
         method: 'POST',
         body: payload,
       });

@@ -6,7 +6,7 @@ const Progress = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/faculty/FAC001/workload')
+    fetch('https://lesson-plan-agent.onrender.com/api/faculty/FAC001/workload')
       .then(res => res.json())
       .then(data => {
         setWorkload(data);
