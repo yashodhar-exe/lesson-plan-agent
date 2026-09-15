@@ -35,7 +35,7 @@ function App() {
     // Sync the Supabase user with our backend
     if (session) {
       const user = session.user;
-      fetch('https://lesson-plan-agent.onrender.com/api/faculty/sync', {
+      fetch(`${import.meta.env.VITE_API_URL}/api/faculty/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

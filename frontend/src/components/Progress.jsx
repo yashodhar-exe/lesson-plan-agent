@@ -6,7 +6,7 @@ const Progress = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('https://lesson-plan-agent.onrender.com/api/faculty/FAC001/workload')
+    fetch(`${import.meta.env.VITE_API_URL}/api/faculty/FAC001/workload`)
       .then(res => res.json())
       .then(data => {
         setWorkload(data);

@@ -12,7 +12,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
   useEffect(() => {
     if (!facultyId) return;
     // Fetch courses for specific faculty
-    fetch(`https://lesson-plan-agent.onrender.com/api/faculty/${facultyId}/courses`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/faculty/${facultyId}/courses`)
       .then(res => res.json())
       .then(data => {
         setCourses(data);
@@ -23,7 +23,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
 
   useEffect(() => {
     if (!selectedCourse) return;
-    fetch(`https://lesson-plan-agent.onrender.com/api/courses/${selectedCourse}/sections`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/courses/${selectedCourse}/sections`)
       .then(res => res.json())
       .then(data => {
         setSections(data);
@@ -40,7 +40,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
     }
     setLoading(true);
     setError(null);
-    fetch(`https://lesson-plan-agent.onrender.com/api/lesson-plans/search?course_id=${selectedCourse}&section_id=${selectedSection}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/lesson-plans/search?course_id=${selectedCourse}&section_id=${selectedSection}`)
       .then(res => {
         if (!res.ok) throw new Error("Plan not found for this section.");
         return res.json();
