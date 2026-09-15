@@ -33,7 +33,7 @@ const Dashboard = ({ facultyId, faculty, setCurrentView }) => {
       </div>
 
       {loading ? (
-          <div className="p-12 flex flex-col items-center justify-center gap-4 text-brand-secondary">
+          <div className="pt-32 pb-12 flex flex-col items-center justify-center gap-4 text-brand-secondary">
             <l-chaotic-orbit size="35" speed="1.5" color="#1e40af"></l-chaotic-orbit>
           </div>
       ) : error ? (
