@@ -44,7 +44,7 @@ const Dashboard = ({ facultyId, faculty, setCurrentView }) => {
         <div className="flex flex-col gap-8 items-start">
           <div className="w-full">
             <NextClass nextClass={workload?.next_class} setCurrentView={setCurrentView} />
-            <CourseList sections={workload?.sections} />
+            <CourseList sections={workload?.sections} setCurrentView={setCurrentView} />
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Date, ForeignKey, Enum as SqlEnum, Boolean, Float, Text, JSON
+from sqlalchemy import Column, String, Integer, Date, DateTime, ForeignKey, Enum as SqlEnum, Boolean, Float, Text, JSON
 from sqlalchemy.orm import relationship
 import enum
 import uuid
@@ -54,6 +54,19 @@ class Faculty(Base):
     department_id = Column(String, ForeignKey("departments.id"))
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
+    
+    # Settings / Preferences
+    designation = Column(String, default="Professor")
+    academic_affiliation = Column(String, default="Autonomous Board of Studies (BOS) Member")
+    default_academic_term = Column(String, default="CSE Sem I 2026–27 (Active)")
+    lesson_plan_granularity = Column(String, default="Daily Lecture-wise")
+    buffer_classes_allowance = Column(Integer, default=2)
+    auto_replanning = Column(Boolean, default=True)
+    notify_attendance = Column(Boolean, default=True)
+    notify_weekly_report = Column(Boolean, default=True)
+    notify_lesson_deviation = Column(Boolean, default=True)
+    notify_institutional = Column(Boolean, default=True)
+    last_settings_update = Column(DateTime, default=datetime.utcnow)
 
 class Course(Base):
     __tablename__ = "courses"

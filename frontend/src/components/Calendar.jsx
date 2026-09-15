@@ -3,22 +3,29 @@ import React, { useState, useEffect } from 'react';
 const Calendar = ({ facultyId }) => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [weekOffset, setWeekOffset] = useState(0);
   
   // Generate current week dates
-  const getWeekDates = () => {
+  const getWeekDates = (offset) => {
     const curr = new Date();
+    // Adjust by offset weeks
+    curr.setDate(curr.getDate() + (offset * 7));
     const first = curr.getDate() - curr.getDay() + 1; // First day is Monday
     return Array.from({ length: 5 }).map((_, i) => {
       const date = new Date(curr.setDate(first + i));
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
       return {
         name: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i],
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dateStr: `${year}-${month}-${d}`,
         dayIndex: i + 1
       };
     });
   };
   
-  const days = getWeekDates();
+  const days = getWeekDates(weekOffset);
 
   const timeSlots = [
     { period: 1, label: "09:00", ampm: "AM", range: "09:00 - 09:50" },
@@ -81,20 +88,19 @@ const Calendar = ({ facultyId }) => {
         <div>
           <div className="flex items-baseline gap-3">
             <h1 className="text-3xl font-bold text-brand-text tracking-tight">Schedule</h1>
-            <span className="text-brand-primary text-sm font-semibold">Live Database Sync</span>
           </div>
-          <p className="text-sm text-brand-secondary mt-1">Manage your weekly instructional timetable mapped from actual backend data.</p>
+          <p className="text-sm text-brand-secondary mt-1">Manage your weekly instructional timetable and track your upcoming classes.</p>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4 bg-white p-2 rounded-xl shadow-sm border border-brand-border/30">
-            <button className="p-2 hover:bg-brand-surface rounded-lg text-brand-secondary transition-colors flex items-center justify-center">
+            <button onClick={() => setWeekOffset(prev => prev - 1)} className="p-2 hover:bg-brand-surface rounded-lg text-brand-secondary transition-colors flex items-center justify-center">
               <span className="material-symbols-outlined text-[20px]">chevron_left</span>
             </button>
             <div className="text-sm font-semibold text-brand-text w-48 text-center">
-              This Week
+              {weekOffset === 0 ? "This Week" : weekOffset === 1 ? "Next Week" : weekOffset === -1 ? "Last Week" : `${Math.abs(weekOffset)} Weeks ${weekOffset > 0 ? 'Ahead' : 'Ago'}`}
             </div>
-            <button className="p-2 hover:bg-brand-surface rounded-lg text-brand-secondary transition-colors flex items-center justify-center">
+            <button onClick={() => setWeekOffset(prev => prev + 1)} className="p-2 hover:bg-brand-surface rounded-lg text-brand-secondary transition-colors flex items-center justify-center">
               <span className="material-symbols-outlined text-[20px]">chevron_right</span>
             </button>
           </div>
@@ -130,7 +136,7 @@ const Calendar = ({ facultyId }) => {
                      </div>
                      
                      {days.map((day, idx) => {
-                        const sessionMatch = sessions.find(s => s.period === slot.period && s.dayIndex === day.dayIndex);
+                        const sessionMatch = sessions.find(s => s.period === slot.period && s.date === day.dateStr);
                         const isLastDay = idx === 4;
                         const borderClasses = isLastDay ? 'border-b border-brand-border/30' : 'border-r border-b border-brand-border/30';
 

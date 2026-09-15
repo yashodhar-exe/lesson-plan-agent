@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-const Progress = () => {
+const Progress = ({ facultyId }) => {
   const [workload, setWorkload] = useState({ sections: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/faculty/FAC001/workload`)
+    if (!facultyId) return;
+    fetch(`${import.meta.env.VITE_API_URL}/api/faculty/${facultyId}/workload`)
       .then(res => res.json())
       .then(data => {
         setWorkload(data);
@@ -17,7 +18,7 @@ const Progress = () => {
         setError("Failed to fetch progress data.");
         setLoading(false);
       });
-  }, []);
+  }, [facultyId]);
 
   if (loading) {
     return (
@@ -111,7 +112,6 @@ const Progress = () => {
         <section aria-label="Course Execution Worksheets" className="space-y-6">
           <div className="flex items-center justify-between pb-1">
             <h2 className="text-xl font-semibold text-brand-text tracking-tight">Active Academic Offerings ({sections.length})</h2>
-            <span className="text-xs font-semibold text-brand-secondary uppercase tracking-wide">Registry Sync Status: Live</span>
           </div>
 
           {sections.length === 0 ? (

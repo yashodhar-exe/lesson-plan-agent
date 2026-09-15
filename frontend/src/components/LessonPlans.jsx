@@ -8,6 +8,46 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
   const [planData, setPlanData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const fetchPlanData = () => {
+    if (!selectedCourse || !selectedSection) return;
+    setLoading(true);
+    setError(null);
+    fetch(`${import.meta.env.VITE_API_URL}/api/lesson-plans/search?course_id=${selectedCourse}&section_id=${selectedSection}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Plan not found for this section.");
+        return res.json();
+      })
+      .then(data => setPlanData(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  };
+
+  const handleUpdateSessionStatus = async (sessionId, status) => {
+    try {
+      setUpdatingStatus(true);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lesson-plans/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error("Failed to update session");
+      
+      // Refresh the plan
+      fetchPlanData();
+      setEditingSessionId(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error updating session: " + err.message);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   useEffect(() => {
     if (!facultyId) return;
@@ -34,20 +74,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
   }, [selectedCourse]);
 
   useEffect(() => {
-    if (!selectedCourse || !selectedSection) {
-      setPlanData(null);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    fetch(`${import.meta.env.VITE_API_URL}/api/lesson-plans/search?course_id=${selectedCourse}&section_id=${selectedSection}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Plan not found for this section.");
-        return res.json();
-      })
-      .then(data => setPlanData(data))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+    fetchPlanData();
   }, [selectedCourse, selectedSection]);
 
   const sessions = planData?.sessions || [];
@@ -62,7 +89,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
     <div className="w-full h-full">
       <div className="flex-1 flex flex-col gap-8 max-w-7xl w-full mx-auto">
         {/* PAGE HEADER */}
-        <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <section className="print:hidden flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-brand-text tracking-tight">Lesson Plans</h1>
             <p className="text-sm text-brand-secondary mt-1 max-w-3xl">
@@ -82,7 +109,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
         </section>
 
         {/* CONTROLS & FILTER BAR */}
-        <section className="bg-white border border-brand-border rounded p-4 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-sm">
+        <section className="print:hidden bg-white border border-brand-border rounded p-4 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
             {/* Course Selector */}
             <div className="flex flex-col gap-1">
@@ -119,7 +146,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
 
         {/* KEY SUMMARY METRICS STRIP */}
         {planData && !loading && (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <section className="print:hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Metric 1: Total Sessions */}
             <div className="bg-white border border-brand-border rounded p-4 flex flex-col justify-between shadow-sm">
               <div className="flex items-center justify-between">
@@ -174,7 +201,7 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
           <section className="bg-white border border-brand-border rounded overflow-hidden shadow-sm">
             <div className="px-4 py-3 bg-brand-surface border-b border-brand-border flex flex-col sm:flex-row items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-base font-semibold text-brand-text">Instructional Delivery Roster</span>
+                <span className="text-base font-semibold text-brand-text">Schedule</span>
               </div>
             </div>
             
@@ -243,12 +270,41 @@ const LessonPlans = ({ facultyId, setCurrentView }) => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <button className="text-brand-primary hover:text-blue-800 font-medium text-sm inline-flex items-center justify-center gap-0.5 transition-colors">
-                            {isCompleted ? 'View' : 'Edit'}
-                            <span className="material-symbols-outlined text-sm">
-                              {isCompleted ? 'arrow_forward' : 'edit_note'}
-                            </span>
-                          </button>
+                          {editingSessionId === session.id ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <button 
+                                onClick={() => handleUpdateSessionStatus(session.id, 'COMPLETED')}
+                                disabled={updatingStatus}
+                                className="text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded transition-colors"
+                              >
+                                Done
+                              </button>
+                              <button 
+                                onClick={() => handleUpdateSessionStatus(session.id, 'DELAYED')}
+                                disabled={updatingStatus}
+                                className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition-colors"
+                              >
+                                Delayed
+                              </button>
+                              <button 
+                                onClick={() => setEditingSessionId(null)}
+                                disabled={updatingStatus}
+                                className="text-xs text-brand-secondary hover:text-brand-text transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => !isCompleted && setEditingSessionId(session.id)}
+                              className={`font-medium text-sm inline-flex items-center justify-center gap-0.5 transition-colors ${isCompleted ? 'text-brand-secondary cursor-default' : 'text-brand-primary hover:text-blue-800'}`}
+                            >
+                              {isCompleted ? 'Done' : 'Edit'}
+                              <span className="material-symbols-outlined text-sm">
+                                {isCompleted ? 'check' : 'edit_note'}
+                              </span>
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );

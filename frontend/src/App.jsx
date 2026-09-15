@@ -60,21 +60,25 @@ function App() {
 
   return (
     <div className="flex min-h-screen bg-brand-bg text-brand-text selection:bg-brand-light selection:text-brand-primary">
-      <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <div className="print:hidden">
+        <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+      </div>
       
       {/* Main Content Area */}
-      <div className="flex-1 ml-56 flex flex-col min-h-screen">
-        <Header faculty={faculty} session={session} />
+      <div className="flex-1 ml-56 print:ml-0 flex flex-col min-h-screen">
+        <div className="print:hidden">
+          <Header faculty={faculty} session={session} />
+        </div>
         
-        <main className="flex-1 p-10">
+        <main className="flex-1 p-10 print:p-0 print:bg-white">
           <div className="max-w-6xl mx-auto">
             {currentView === 'dashboard' && <Dashboard facultyId={faculty?.id} faculty={faculty} setCurrentView={setCurrentView} />}
             {currentView === 'my-courses' && <CourseSetup facultyId={faculty?.id} faculty={faculty} setCurrentView={setCurrentView} />}
             {currentView === 'lesson-plans' && <LessonPlans facultyId={faculty?.id} setCurrentView={setCurrentView} />}
             {currentView === 'calendar' && <Calendar facultyId={faculty?.id} />}
-            {currentView === 'progress' && <Progress />}
+            {currentView === 'progress' && <Progress facultyId={faculty?.id} />}
             {currentView === 'reports' && <Reports />}
-            {currentView === 'settings' && <Settings faculty={faculty} session={session} />}
+            {currentView === 'settings' && <Settings faculty={faculty} session={session} onFacultyUpdate={setFaculty} />}
           </div>
         </main>
       </div>

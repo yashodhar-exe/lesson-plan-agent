@@ -58,6 +58,10 @@ class LessonPlanSchema(BaseModel):
     status: str
     sessions: List[LessonSessionSchema]
 
+class SessionUpdateSchema(BaseModel):
+    status: str
+    remarks: Optional[str] = None
+
 class VarianceReportSchema(BaseModel):
     lesson_plan_id: str
     planned_sessions: int
@@ -66,3 +70,16 @@ class VarianceReportSchema(BaseModel):
     affected_unit_id: Optional[str]
     buffer_available: int
     recommendation: Optional[str]
+
+class FacultyUpdateSchema(BaseModel):
+    name: Optional[str] = None
+    designation: Optional[str] = None
+    academic_affiliation: Optional[str] = None
+    default_academic_term: Optional[str] = None
+    lesson_plan_granularity: Optional[str] = None
+    buffer_classes_allowance: Optional[int] = None
+    auto_replanning: Optional[bool] = None
+    notify_attendance: Optional[bool] = None
+    notify_weekly_report: Optional[bool] = None
+    notify_lesson_deviation: Optional[bool] = None
+    notify_institutional: Optional[bool] = None

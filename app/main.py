@@ -8,7 +8,7 @@ import os
 
 from app.database.database import engine, Base, get_db
 from app.schemas import (
-    LessonPlanSchema, VarianceReportSchema, CalendarEventSchema, TimetableSlotSchema
+    LessonPlanSchema, VarianceReportSchema, CalendarEventSchema, TimetableSlotSchema, FacultyUpdateSchema, SessionUpdateSchema
 )
 from app.tools.planning_engine import (
     get_available_teaching_slots, 
@@ -52,6 +52,42 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "Lesson Plan Agent API is running"}
+
+from datetime import datetime
+
+@app.put("/api/faculty/{faculty_id}")
+def update_faculty(faculty_id: str, data: FacultyUpdateSchema, db: Session = Depends(get_db)):
+    faculty = db.query(models.Faculty).filter(models.Faculty.id == faculty_id).first()
+    if not faculty:
+        raise HTTPException(status_code=404, detail="Faculty not found")
+    
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        if hasattr(faculty, key):
+            setattr(faculty, key, value)
+            
+    faculty.last_settings_update = datetime.utcnow()
+            
+    db.commit()
+    db.refresh(faculty)
+    
+    return {
+        "id": faculty.id,
+        "name": faculty.name,
+        "email": faculty.email,
+        "department_id": faculty.department_id,
+        "designation": faculty.designation,
+        "academic_affiliation": faculty.academic_affiliation,
+        "default_academic_term": faculty.default_academic_term,
+        "lesson_plan_granularity": faculty.lesson_plan_granularity,
+        "buffer_classes_allowance": faculty.buffer_classes_allowance,
+        "auto_replanning": faculty.auto_replanning,
+        "notify_attendance": faculty.notify_attendance,
+        "notify_weekly_report": faculty.notify_weekly_report,
+        "notify_lesson_deviation": faculty.notify_lesson_deviation,
+        "notify_institutional": faculty.notify_institutional,
+        "last_settings_update": faculty.last_settings_update
+    }
 
 @app.post("/api/calendar/import")
 def import_calendar(file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -126,7 +162,23 @@ def get_faculty(faculty_id: str, db: Session = Depends(get_db)):
     faculty = db.query(models.Faculty).filter(models.Faculty.id == faculty_id).first()
     if not faculty:
         raise HTTPException(status_code=404, detail="Faculty not found")
-    return {"id": faculty.id, "name": faculty.name, "email": faculty.email}
+    return {
+        "id": faculty.id, 
+        "name": faculty.name, 
+        "email": faculty.email,
+        "department_id": faculty.department_id,
+        "designation": faculty.designation,
+        "academic_affiliation": faculty.academic_affiliation,
+        "default_academic_term": faculty.default_academic_term,
+        "lesson_plan_granularity": faculty.lesson_plan_granularity,
+        "buffer_classes_allowance": faculty.buffer_classes_allowance,
+        "auto_replanning": faculty.auto_replanning,
+        "notify_attendance": faculty.notify_attendance,
+        "notify_weekly_report": faculty.notify_weekly_report,
+        "notify_lesson_deviation": faculty.notify_lesson_deviation,
+        "notify_institutional": faculty.notify_institutional,
+        "last_settings_update": faculty.last_settings_update
+    }
 
 @app.get("/api/faculty/{faculty_id}/sections")
 def get_faculty_sections(faculty_id: str, db: Session = Depends(get_db)):
@@ -623,3 +675,105 @@ def setup_course(
             print(f"Failed to generate plan for {sec_id}: {e}")
 
     return {"status": "success", "message": "Course configured and lesson plans generated.", "plans": plans}
+
+@app.put("/api/lesson-plans/sessions/{session_id}")
+def update_lesson_session(session_id: str, update_data: SessionUpdateSchema, db: Session = Depends(get_db)):
+    session = db.query(models.LessonSession).filter(models.LessonSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    old_status = session.status
+    session.status = update_data.status
+    if update_data.remarks:
+        session.faculty_remarks = update_data.remarks
+        
+    if update_data.status == "COMPLETED" and old_status != "COMPLETED":
+        session.actual_hours = session.planned_hours
+        session.completion_timestamp = datetime.utcnow().isoformat()
+        
+    elif update_data.status == "DELAYED" and old_status != "DELAYED":
+        # Variance Logic: Shift subsequent sessions and consume a buffer
+        plan_id = session.lesson_plan_id
+        
+        # Get all future sessions ordered by date and period
+        future_sessions = db.query(models.LessonSession).filter(
+            models.LessonSession.lesson_plan_id == plan_id,
+            models.LessonSession.session_number >= session.session_number
+        ).order_by(models.LessonSession.session_number).all()
+        
+        if not future_sessions:
+            pass # Should not happen
+            
+        # Find the next available buffer session
+        buffer_idx = -1
+        for i, s in enumerate(future_sessions):
+            if s.session_type == "BUFFER" and s.status != "CONSUMED":
+                buffer_idx = i
+                break
+                
+        if buffer_idx != -1:
+            # We have a buffer. Shift everything from the delayed session up to the buffer forward by 1 slot.
+            # Example: s1 (delayed), s2, s3 (buffer)
+            # s3 gets s2's content, s2 gets s1's content, s1 becomes the delayed topic but on the same date?
+            # Wait, the user is saying THIS session (date D) was delayed. So they didn't teach the topic on date D.
+            # Date D's session effectively accomplished nothing (or something else). The topic for Date D needs to be taught on Date D+1.
+            # So the topics from index 0 to buffer_idx-1 shift down by 1.
+            # And index 0 (the current session) keeps the same topic_id (it will be taught again next time? No, if it was delayed, we still need a session for it).
+            # Actually, the simplest shift:
+            # We have slots (date/time). The slots stay fixed. The *topics* shift.
+            
+            # The topic originally planned for session.session_number is now shifted to session.session_number + 1, etc., up to the buffer.
+            # Wait, what if they taught *something else* on this date? The status is "DELAYED".
+            # Let's shift the topic_id, unit_id, course_outcomes, teaching_method, planned_hours of all sessions
+            # from index 0 to buffer_idx - 1 into index 1 to buffer_idx.
+            
+            # Save the original topics
+            topics_to_shift = []
+            for i in range(buffer_idx):
+                s = future_sessions[i]
+                topics_to_shift.append({
+                    "unit_id": s.unit_id,
+                    "topic_id": s.topic_id,
+                    "course_outcomes": s.course_outcomes,
+                    "teaching_method": s.teaching_method,
+                    "planned_hours": s.planned_hours
+                })
+                
+            # Apply shifted topics to next slots
+            for i in range(1, buffer_idx + 1):
+                s = future_sessions[i]
+                prev_topic = topics_to_shift[i - 1]
+                s.unit_id = prev_topic["unit_id"]
+                s.topic_id = prev_topic["topic_id"]
+                s.course_outcomes = prev_topic["course_outcomes"]
+                s.teaching_method = prev_topic["teaching_method"]
+                s.planned_hours = prev_topic["planned_hours"]
+                s.session_type = "LECTURE" # Overwrite buffer
+                
+            # Current session becomes a DELAYED session (no topic progress)
+            current_s = future_sessions[0]
+            current_s.status = "DELAYED"
+            # It retains its topic_id so the UI shows *what* was delayed, but the next session will ALSO have this topic_id.
+            
+            # Mark the buffer as consumed (now it's a regular lecture)
+            future_sessions[buffer_idx].status = "PLANNED"
+            
+            # Trigger Variance Agent for recommendation/notification
+            variance_data = {
+                "planned_sessions": len(future_sessions),
+                "actual_sessions": 0,
+                "variance_sessions": 1,
+                "buffer_available": 1
+            }
+            # Recommendation could be logged or stored, for now we just run it
+            try:
+                generate_replanning_recommendation(get_agent_6(), variance_data)
+            except Exception as e:
+                print(f"Variance agent error: {e}")
+                
+        else:
+            # No buffer available. Just mark it delayed.
+            session.status = "DELAYED"
+    
+    db.commit()
+    return {"status": "success", "message": "Session updated successfully"}

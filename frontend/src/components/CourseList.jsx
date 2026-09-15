@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CourseList = ({ sections = [] }) => {
+const CourseList = ({ sections = [], setCurrentView }) => {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
@@ -43,10 +43,13 @@ const CourseList = ({ sections = [] }) => {
               </div>
               <div className="flex justify-between items-center mt-2.5">
                 <div className="text-[10px] text-brand-muted">Target sessions: {target}</div>
-                <a className="text-[11px] font-medium text-brand-primary flex items-center gap-0.5 hover:underline" href="#">
-                  <span>View Details</span>
+                <button 
+                  onClick={() => setCurrentView('lesson-plans')}
+                  className="text-[11px] font-medium text-brand-primary flex items-center gap-0.5"
+                >
+                  <span className="hover:underline">View Details</span>
                   <span className="material-symbols-outlined text-[13px]">chevron_right</span>
-                </a>
+                </button>
               </div>
             </div>
           </div>

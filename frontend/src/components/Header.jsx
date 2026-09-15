@@ -13,7 +13,7 @@ const Header = ({ faculty, session }) => {
     <header className="h-16 pl-10 pr-6 flex items-center justify-end bg-brand-bg sticky top-0 z-20">
       <div className="flex items-center gap-5">
         {/* Semester Selector */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-brand-border/70 text-[12px] text-brand-secondary bg-white">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-brand-border/70 text-[12px] text-brand-secondary bg-white cursor-pointer hover:bg-gray-50 transition-colors">
           <span className="material-symbols-outlined text-[15px] text-brand-muted">school</span>
           <span>CSE · Sem I · 2026–27</span>
           <span className="material-symbols-outlined text-[14px] text-brand-muted">expand_more</span>
