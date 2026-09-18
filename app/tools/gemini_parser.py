@@ -28,23 +28,14 @@ def generate_with_fallback(client, contents, response_mime_type="application/jso
                 error_str = str(e)
                 if "429" in error_str or "503" in error_str:
                     error_code = "429" if "429" in error_str else "503"
-                    print(f"API Unavailable ({error_code}). Retrying once before Groq fallback...")
-                    if attempt < 1:
+                    print(f"API Unavailable ({error_code}). Retrying...")
+                    if attempt < max_retries - 1:
                         time.sleep(2)
                         continue
                     else:
-                        print(f"Gemini {error_code} persists. Falling back to Groq...")
-                        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
-                        if file_path and prompt_text:
-                            class MockResponse:
-                                def __init__(self, text):
-                                    self.text = text
-                            groq_text = fallback_parse_pdf_with_groq(file_path, prompt_text)
-                            return MockResponse(groq_text)
-                        else:
-                            raise e
+                        raise e
                 elif "404" not in error_str:
-                    # If it's a different kind of error (like auth or bad request), don't fallback
+                    # If it's a different kind of error (like auth or bad request), don't retry
                     raise e
                 break # Break out of retries for this model if it's 404
     raise last_error
@@ -86,14 +77,8 @@ def parse_timetable_with_gemini(file_path: str, mime_type: str = "application/pd
         response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
         return json.loads(response.text)
     except Exception as e:
-        print(f"Gemini failed during timetable parsing: {e}. Falling back to Groq...")
-        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
-        response_text = fallback_parse_pdf_with_groq(file_path, prompt)
-        try:
-            return json.loads(response_text)
-        except json.JSONDecodeError as je:
-            print(f"Failed to decode JSON from Groq: {response_text}")
-            raise je
+        print(f"Gemini failed during timetable parsing: {e}")
+        raise e
 
 def parse_calendar_with_gemini(file_path: str, mime_type: str = "application/pdf"):
     """
@@ -120,14 +105,8 @@ def parse_calendar_with_gemini(file_path: str, mime_type: str = "application/pdf
         response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
         return json.loads(response.text)
     except Exception as e:
-        print(f"Gemini failed during calendar parsing: {e}. Falling back to Groq...")
-        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
-        response_text = fallback_parse_pdf_with_groq(file_path, prompt)
-        try:
-            return json.loads(response_text)
-        except json.JSONDecodeError as je:
-            print(f"Failed to decode JSON from Groq: {response_text}")
-            raise je
+        print(f"Gemini failed during calendar parsing: {e}")
+        raise e
 
 def parse_syllabus_with_gemini(file_path: str, mime_type: str = "application/pdf"):
     """
@@ -153,11 +132,5 @@ def parse_syllabus_with_gemini(file_path: str, mime_type: str = "application/pdf
         response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
         return json.loads(response.text)
     except Exception as e:
-        print(f"Gemini failed during syllabus parsing: {e}. Falling back to Groq...")
-        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
-        response_text = fallback_parse_pdf_with_groq(file_path, prompt)
-        try:
-            return json.loads(response_text)
-        except json.JSONDecodeError as je:
-            print(f"Failed to decode JSON from Groq: {response_text}")
-            raise je
+        print(f"Gemini failed during syllabus parsing: {e}")
+        raise e
