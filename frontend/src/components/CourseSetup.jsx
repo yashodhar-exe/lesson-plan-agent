@@ -233,9 +233,9 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                 </div>
                 <div>
                   <label className="cursor-pointer">
-                    <div className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${files.calendar ? 'bg-green-50 text-green-700 hover:bg-green-100' : 'bg-transparent text-brand-primary hover:text-brand-primary/80'}`}>
+                    <div className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${files.calendar ? 'bg-transparent text-green-700' : 'bg-transparent text-brand-primary hover:text-brand-primary/80'}`}>
                       {files.calendar ? (
-                        <><span className="material-symbols-outlined text-[14px]">check_circle</span> {files.calendar.name}</>
+                        <>{files.calendar.name}</>
                       ) : (
                         'Upload PDF'
                       )}
@@ -258,9 +258,9 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                 </div>
                 <div>
                   <label className="cursor-pointer">
-                    <div className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${files.timetable ? 'bg-green-50 text-green-700 hover:bg-green-100' : 'bg-transparent text-brand-primary hover:text-brand-primary/80'}`}>
+                    <div className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${files.timetable ? 'bg-transparent text-green-700' : 'bg-transparent text-brand-primary hover:text-brand-primary/80'}`}>
                       {files.timetable ? (
-                        <><span className="material-symbols-outlined text-[14px]">check_circle</span> {files.timetable.name}</>
+                        <>{files.timetable.name}</>
                       ) : (
                         'Upload PDF'
                       )}
@@ -283,9 +283,9 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                 </div>
                 <div>
                   <label className="cursor-pointer">
-                    <div className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${files.syllabus ? 'bg-green-50 text-green-700 hover:bg-green-100' : 'bg-transparent text-brand-primary hover:text-brand-primary/80'}`}>
+                    <div className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${files.syllabus ? 'bg-transparent text-green-700' : 'bg-transparent text-brand-primary hover:text-brand-primary/80'}`}>
                       {files.syllabus ? (
-                        <><span className="material-symbols-outlined text-[14px]">check_circle</span> {files.syllabus.name}</>
+                        <>{files.syllabus.name}</>
                       ) : (
                         'Upload PDF'
                       )}
@@ -318,7 +318,7 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                 {isSubmitting ? (
                   <>
                     <l-chaotic-orbit size="20" speed="1.5" color="currentColor"></l-chaotic-orbit>
-                    <span>Processing AI Data (Takes ~1 min)...</span>
+                    <span>Processing</span>
                   </>
                 ) : (
                   <>
