@@ -57,16 +57,6 @@ def parse_timetable_with_gemini(file_path: str, mime_type: str = "application/pd
     - faculty_name (if present)
     - type (LECTURE, LAB, etc.)
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY is not set.")
-        
-    client = genai.Client(api_key=api_key)
-    
-    # Upload the file to Gemini
-    # Note: For production with multiple files, we'd cache these, but for simplicity here we upload per request
-    uploaded_file = client.files.upload(file=file_path, config={'mime_type': mime_type})
-    
     prompt = """
     Extract all teaching timetable slots from this document.
     CRITICAL: This document contains multiple pages/sections. You MUST extract every single slot from EVERY section. DO NOT stop early or skip any pages.
@@ -83,26 +73,29 @@ def parse_timetable_with_gemini(file_path: str, mime_type: str = "application/pd
     Make sure to match the faculty member and course to the correct section and time.
     """
     
-    response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
-    
     try:
-        data = json.loads(response.text)
-        return data
-    except json.JSONDecodeError as e:
-        print(f"Failed to decode JSON from Gemini: {response.text}")
-        raise e
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY is not set.")
+            
+        client = genai.Client(api_key=api_key)
+        uploaded_file = client.files.upload(file=file_path, config={'mime_type': mime_type})
+        response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Gemini failed during timetable parsing: {e}. Falling back to Groq...")
+        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
+        response_text = fallback_parse_pdf_with_groq(file_path, prompt)
+        try:
+            return json.loads(response_text)
+        except json.JSONDecodeError as je:
+            print(f"Failed to decode JSON from Groq: {response_text}")
+            raise je
 
 def parse_calendar_with_gemini(file_path: str, mime_type: str = "application/pdf"):
     """
     Uses the Gemini API to parse an academic calendar into structured JSON.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY is not set.")
-        
-    client = genai.Client(api_key=api_key)
-    uploaded_file = client.files.upload(file=file_path, config={'mime_type': mime_type})
-    
     prompt = """
     Extract all significant dates from this academic calendar.
     Return ONLY a raw JSON array of objects. Do not include markdown formatting like ```json.
@@ -114,26 +107,29 @@ def parse_calendar_with_gemini(file_path: str, mime_type: str = "application/pdf
     If an event spans multiple days (like exams), create a separate object for EACH day.
     """
     
-    response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
-    
     try:
-        data = json.loads(response.text)
-        return data
-    except json.JSONDecodeError as e:
-        print(f"Failed to decode JSON from Gemini: {response.text}")
-        raise e
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY is not set.")
+            
+        client = genai.Client(api_key=api_key)
+        uploaded_file = client.files.upload(file=file_path, config={'mime_type': mime_type})
+        response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Gemini failed during calendar parsing: {e}. Falling back to Groq...")
+        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
+        response_text = fallback_parse_pdf_with_groq(file_path, prompt)
+        try:
+            return json.loads(response_text)
+        except json.JSONDecodeError as je:
+            print(f"Failed to decode JSON from Groq: {response_text}")
+            raise je
 
 def parse_syllabus_with_gemini(file_path: str, mime_type: str = "application/pdf"):
     """
     Uses the Gemini API to parse a course syllabus into structured JSON.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY is not set.")
-        
-    client = genai.Client(api_key=api_key)
-    uploaded_file = client.files.upload(file=file_path, config={'mime_type': mime_type})
-    
     prompt = """
     Extract the units, topics, and course outcomes from this syllabus.
     Return ONLY a raw JSON array of objects. Do not include markdown formatting like ```json.
@@ -144,11 +140,21 @@ def parse_syllabus_with_gemini(file_path: str, mime_type: str = "application/pdf
     - "topics": array of strings (the individual topics covered in this unit)
     """
     
-    response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
-    
     try:
-        data = json.loads(response.text)
-        return data
-    except json.JSONDecodeError as e:
-        print(f"Failed to decode JSON from Gemini: {response.text}")
-        raise e
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY is not set.")
+            
+        client = genai.Client(api_key=api_key)
+        uploaded_file = client.files.upload(file=file_path, config={'mime_type': mime_type})
+        response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Gemini failed during syllabus parsing: {e}. Falling back to Groq...")
+        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
+        response_text = fallback_parse_pdf_with_groq(file_path, prompt)
+        try:
+            return json.loads(response_text)
+        except json.JSONDecodeError as je:
+            print(f"Failed to decode JSON from Groq: {response_text}")
+            raise je
