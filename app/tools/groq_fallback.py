@@ -16,7 +16,7 @@ def call_groq_api(prompt, text=None, is_json=True):
         content += f"\n\nDocument Text:\n{text}"
         
     data = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [
             {"role": "user", "content": content}
         ]

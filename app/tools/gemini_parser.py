@@ -3,6 +3,9 @@ import json
 import time
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def generate_with_fallback(client, contents, response_mime_type="application/json", file_path=None, prompt_text=None):
     max_retries = 3
