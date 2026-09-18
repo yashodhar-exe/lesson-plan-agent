@@ -56,6 +56,9 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
       if (!formData.courseName || !formData.courseCode || !formData.department || !formData.instructor) {
         throw new Error("Please fill out all course details.");
       }
+      if (formData.courseCode.length !== 7) {
+        throw new Error("Course code must be exactly 7 characters (e.g., 24CS306).");
+      }
 
       const payload = new FormData();
       payload.append('course_name', formData.courseName);
@@ -141,7 +144,8 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                   value={formData.courseCode}
                   onChange={handleInputChange}
                   className="w-full h-11 px-0 border-0 border-b border-brand-border bg-transparent text-base font-medium text-brand-text focus:outline-none focus:border-brand-primary focus:ring-0 transition-all placeholder:text-brand-muted/70 placeholder:font-normal"
-                  placeholder="e.g. CS301"
+                  placeholder="e.g. 24CS306"
+                  maxLength={7}
                 />
               </div>
               <div className="group">
@@ -248,7 +252,7 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                     <span className="material-symbols-outlined text-[20px]">view_week</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-brand-text">Master Timetable</h4>
+                    <h4 className="text-sm font-semibold text-brand-text">Timetable</h4>
                     <p className="text-xs text-brand-secondary">Section schedules & periods</p>
                   </div>
                 </div>
@@ -314,7 +318,7 @@ const CourseSetup = ({ facultyId, faculty, setCurrentView }) => {
                 {isSubmitting ? (
                   <>
                     <l-chaotic-orbit size="20" speed="1.5" color="currentColor"></l-chaotic-orbit>
-                    <span>Extracting AI Data (Takes ~1 min)...</span>
+                    <span>Processing AI Data (Takes ~1 min)...</span>
                   </>
                 ) : (
                   <>

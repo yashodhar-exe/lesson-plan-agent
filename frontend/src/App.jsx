@@ -77,7 +77,7 @@ function App() {
             {currentView === 'lesson-plans' && <LessonPlans facultyId={faculty?.id} setCurrentView={setCurrentView} />}
             {currentView === 'calendar' && <Calendar facultyId={faculty?.id} />}
             {currentView === 'progress' && <Progress facultyId={faculty?.id} />}
-            {currentView === 'reports' && <Reports />}
+            {currentView === 'reports' && <Reports facultyId={faculty?.id} />}
             {currentView === 'settings' && <Settings faculty={faculty} session={session} onFacultyUpdate={setFaculty} />}
           </div>
         </main>

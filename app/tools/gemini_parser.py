@@ -4,7 +4,7 @@ import time
 from google import genai
 from google.genai import types
 
-def generate_with_fallback(client, contents, response_mime_type="application/json"):
+def generate_with_fallback(client, contents, response_mime_type="application/json", file_path=None, prompt_text=None):
     max_retries = 3
     models = ['gemini-3.6-flash']
     last_error = None
@@ -27,10 +27,26 @@ def generate_with_fallback(client, contents, response_mime_type="application/jso
                     print("Rate limit reached (429). Waiting 35 seconds before retrying...")
                     time.sleep(35)
                     continue
-                elif "503" not in error_str and "404" not in error_str:
+                elif "503" in error_str:
+                    print("API Unavailable (503). Retrying once before Groq fallback...")
+                    if attempt < 1:
+                        time.sleep(2)
+                        continue
+                    else:
+                        print("Gemini 503 persists. Falling back to Groq...")
+                        from app.tools.groq_fallback import fallback_parse_pdf_with_groq
+                        if file_path and prompt_text:
+                            class MockResponse:
+                                def __init__(self, text):
+                                    self.text = text
+                            groq_text = fallback_parse_pdf_with_groq(file_path, prompt_text)
+                            return MockResponse(groq_text)
+                        else:
+                            raise e
+                elif "404" not in error_str:
                     # If it's a different kind of error (like auth or bad request), don't fallback
                     raise e
-                break # Break out of retries for this model if it's 503 or 404
+                break # Break out of retries for this model if it's 404
     raise last_error
 
 def parse_timetable_with_gemini(file_path: str, mime_type: str = "application/pdf"):
@@ -70,7 +86,7 @@ def parse_timetable_with_gemini(file_path: str, mime_type: str = "application/pd
     Make sure to match the faculty member and course to the correct section and time.
     """
     
-    response = generate_with_fallback(client, [uploaded_file, prompt])
+    response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
     
     try:
         data = json.loads(response.text)
@@ -101,7 +117,7 @@ def parse_calendar_with_gemini(file_path: str, mime_type: str = "application/pdf
     If an event spans multiple days (like exams), create a separate object for EACH day.
     """
     
-    response = generate_with_fallback(client, [uploaded_file, prompt])
+    response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
     
     try:
         data = json.loads(response.text)
@@ -131,7 +147,7 @@ def parse_syllabus_with_gemini(file_path: str, mime_type: str = "application/pdf
     - "topics": array of strings (the individual topics covered in this unit)
     """
     
-    response = generate_with_fallback(client, [uploaded_file, prompt])
+    response = generate_with_fallback(client, [uploaded_file, prompt], file_path=file_path, prompt_text=prompt)
     
     try:
         data = json.loads(response.text)

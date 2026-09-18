@@ -30,6 +30,20 @@ def enrich_lesson_plan(agent, draft_plan, course_outcomes, reference_materials):
             return json.loads(json_match.group(1))
         return json.loads(content)
     except Exception as e:
+        error_str = str(e)
+        if "503" in error_str:
+            print("Gemini 503 persists in Agent 5. Falling back to Groq...")
+            try:
+                from app.tools.groq_fallback import call_groq_api
+                content = call_groq_api(prompt)
+                import re
+                json_match = re.search(r'```json\n(.*?)```', content, re.DOTALL)
+                if json_match:
+                    return json.loads(json_match.group(1))
+                return json.loads(content)
+            except Exception as groq_e:
+                print(f"Groq fallback also failed: {groq_e}")
+                
         print(f"LLM Enrichment failed: {e}")
         for session in draft_plan:
             if session.get("session_type") == "TEACHING":

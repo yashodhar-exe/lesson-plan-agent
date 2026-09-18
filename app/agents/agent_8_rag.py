@@ -33,5 +33,18 @@ class RAGAgent:
                 return ast.literal_eval(match.group(0))
             return [content]
         except Exception as e:
+            error_str = str(e)
+            if "503" in error_str:
+                print("Gemini 503 persists in Agent 8. Falling back to Groq...")
+                try:
+                    from app.tools.groq_fallback import call_groq_api
+                    content = call_groq_api(prompt, is_json=False).strip()
+                    match = re.search(r'\[.*\]', content, re.DOTALL)
+                    if match:
+                        return ast.literal_eval(match.group(0))
+                    return [content]
+                except Exception as groq_e:
+                    print(f"Groq fallback also failed: {groq_e}")
+                    
             # Fallback
             return [f"Standard Textbook for {topic_name}", "Online Documentation"]

@@ -11,13 +11,13 @@ const Calendar = ({ facultyId }) => {
     // Adjust by offset weeks
     curr.setDate(curr.getDate() + (offset * 7));
     const first = curr.getDate() - curr.getDay() + 1; // First day is Monday
-    return Array.from({ length: 5 }).map((_, i) => {
+    return Array.from({ length: 6 }).map((_, i) => {
       const date = new Date(curr.setDate(first + i));
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const d = String(date.getDate()).padStart(2, '0');
       return {
-        name: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][i],
+        name: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i],
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         dateStr: `${year}-${month}-${d}`,
         dayIndex: i + 1
@@ -108,12 +108,12 @@ const Calendar = ({ facultyId }) => {
 
         <div className="bg-white/80 rounded-2xl shadow-xl shadow-brand-border/10 border border-brand-border/30 overflow-hidden backdrop-blur-xl">
           <div className="min-w-[1000px]">
-            <div className="grid grid-cols-[100px_repeat(5,1fr)] border-b border-brand-border/30 bg-brand-bg/50">
+            <div className="grid grid-cols-[100px_repeat(6,1fr)] border-b border-brand-border/30 bg-brand-bg/50">
               <div className="p-4 border-r border-brand-border/30 flex items-center justify-center">
                 <span className="material-symbols-outlined text-brand-muted text-[20px]">schedule</span>
               </div>
               {days.map((day, idx) => (
-                <div key={idx} className={`p-4 ${idx !== 4 ? 'border-r border-brand-border/30' : ''} text-center flex flex-col items-center justify-center group`}>
+                <div key={idx} className={`p-4 ${idx !== 5 ? 'border-r border-brand-border/30' : ''} text-center flex flex-col items-center justify-center group`}>
                   <span className="text-xs font-bold text-brand-muted uppercase tracking-wider group-hover:text-brand-primary transition-colors">{day.name}</span>
                   <span className="text-lg font-black text-brand-text mt-1">{day.date}</span>
                 </div>
@@ -129,7 +129,7 @@ const Calendar = ({ facultyId }) => {
             ) : (
               timeSlots.map((slot) => {
                  return (
-                   <div key={slot.period} className="grid grid-cols-[100px_repeat(5,1fr)] h-32 group/row">
+                   <div key={slot.period} className="grid grid-cols-[100px_repeat(6,1fr)] h-32 group/row">
                      <div className="p-3 border-r border-b border-brand-border/30 bg-brand-bg/30 text-center flex flex-col items-center justify-center">
                        <span className="text-sm font-bold text-brand-text">{slot.label}</span>
                        <span className="text-[10px] font-semibold text-brand-muted uppercase tracking-widest mt-1">{slot.ampm}</span>
@@ -137,7 +137,7 @@ const Calendar = ({ facultyId }) => {
                      
                      {days.map((day, idx) => {
                         const sessionMatch = sessions.find(s => s.period === slot.period && s.date === day.dateStr);
-                        const isLastDay = idx === 4;
+                        const isLastDay = idx === 5;
                         const borderClasses = isLastDay ? 'border-b border-brand-border/30' : 'border-r border-b border-brand-border/30';
 
                         if (!sessionMatch) {
