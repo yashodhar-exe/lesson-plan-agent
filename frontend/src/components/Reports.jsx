@@ -151,7 +151,7 @@ const Reports = ({ facultyId }) => {
                   </p>
                 </div>
                 <div className="mt-5 pt-4 border-t border-brand-border flex items-center justify-between">
-                  <span className="px-2 py-0.5 bg-brand-surface border border-brand-border rounded text-xs text-brand-secondary font-medium">
+                  <span className="text-xs text-brand-secondary font-medium">
                     14 flagged scholars
                   </span>
                   <button className="flex items-center gap-1 px-3 py-1 border border-brand-primary text-brand-primary hover:bg-brand-surface rounded text-sm font-medium transition-colors" type="button">
@@ -174,7 +174,7 @@ const Reports = ({ facultyId }) => {
                   </p>
                 </div>
                 <div className="mt-5 pt-4 border-t border-brand-border flex items-center justify-between">
-                  <span className="px-2 py-0.5 bg-brand-surface border border-brand-border rounded text-xs text-brand-secondary font-medium">
+                  <span className="text-xs text-brand-secondary font-medium">
                     2 of 5 CIE completed
                   </span>
                   <button className="flex items-center gap-1 px-3 py-1 border border-brand-border text-brand-text hover:bg-brand-surface rounded text-sm font-medium transition-colors" type="button">
