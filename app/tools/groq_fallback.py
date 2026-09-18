@@ -29,10 +29,10 @@ def call_groq_api(prompt, text=None, is_json=True):
 def fallback_parse_pdf_with_groq(file_path: str, prompt: str):
     text = ""
     try:
-        import fitz
-        doc = fitz.open(file_path)
-        for page in doc:
-            text += page.get_text()
+        from pypdf import PdfReader
+        reader = PdfReader(file_path)
+        for page in reader.pages:
+            text += page.extract_text()
     except Exception as e:
         print(f"Failed to extract text from PDF for Groq fallback: {e}")
         return "{}"
