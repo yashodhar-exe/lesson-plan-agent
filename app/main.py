@@ -777,3 +777,13 @@ def update_lesson_session(session_id: str, update_data: SessionUpdateSchema, db:
     
     db.commit()
     return {"status": "success", "message": "Session updated successfully"}
+
+class ChatRequest(BaseModel):
+    faculty_id: str
+    query: str
+
+@app.post("/api/chat")
+def chat_with_agent(req: ChatRequest, db: Session = Depends(get_db)):
+    from app.agents.agent_10_chat import ChatAgent
+    response = ChatAgent.handle_query(req.faculty_id, req.query, db)
+    return {"response": response}

@@ -62,6 +62,14 @@ const Sidebar = ({ currentView, setCurrentView }) => {
           </a>
           <a
             href="#"
+            onClick={(e) => { e.preventDefault(); setCurrentView('chat'); }}
+            className={`flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${currentView === 'chat' ? 'font-medium bg-brand-surface text-brand-primary' : 'font-normal text-brand-secondary hover:text-brand-text hover:bg-brand-surface/60'}`}
+          >
+            <span className="material-symbols-outlined text-[18px]">chat</span>
+            <span>Chat</span>
+          </a>
+          <a
+            href="#"
             onClick={(e) => { e.preventDefault(); setCurrentView('settings'); }}
             className={`flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${currentView === 'settings' ? 'font-medium bg-brand-surface text-brand-primary' : 'font-normal text-brand-secondary hover:text-brand-text hover:bg-brand-surface/60'}`}
           >

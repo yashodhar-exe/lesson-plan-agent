@@ -10,8 +10,10 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
+import Chat from './components/Chat';
 
 function App() {
+
   const [session, setSession] = useState(null);
   const [currentView, setCurrentView] = useState('dashboard');
   
@@ -78,6 +80,7 @@ function App() {
             {currentView === 'calendar' && <Calendar facultyId={faculty?.id} />}
             {currentView === 'progress' && <Progress facultyId={faculty?.id} />}
             {currentView === 'reports' && <Reports facultyId={faculty?.id} />}
+            {currentView === 'chat' && <Chat facultyId={faculty?.id} />}
             {currentView === 'settings' && <Settings faculty={faculty} session={session} onFacultyUpdate={setFaculty} />}
           </div>
         </main>
