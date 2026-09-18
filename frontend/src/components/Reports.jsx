@@ -126,13 +126,13 @@ const Reports = ({ facultyId }) => {
                   </p>
                 </div>
                 <div className="mt-5 pt-4 border-t border-brand-border flex flex-col gap-2">
-                  <span className="px-2 py-0.5 bg-brand-surface border border-brand-border rounded text-xs text-brand-secondary font-medium">
+                  <span className="text-xs text-brand-secondary font-medium">
                     Planned: {planVsActual?.total_planned_hours || 0} hrs
                   </span>
-                  <span className="px-2 py-0.5 bg-brand-surface border border-brand-border rounded text-xs text-brand-secondary font-medium">
+                  <span className="text-xs text-brand-secondary font-medium">
                     Actual: {planVsActual?.total_actual_hours || 0} hrs
                   </span>
-                  <span className={`px-2 py-0.5 border rounded text-xs font-medium ${planVsActual?.variance > 0 ? 'bg-red-50 border-red-200 text-red-600' : 'bg-brand-surface border-brand-border text-brand-secondary'}`}>
+                  <span className={`text-xs font-medium ${planVsActual?.variance > 0 ? 'text-red-600' : 'text-brand-secondary'}`}>
                     Variance: {planVsActual?.variance || 0} hrs
                   </span>
                 </div>
