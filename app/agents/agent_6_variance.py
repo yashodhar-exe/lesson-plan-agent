@@ -26,8 +26,8 @@ def generate_replanning_recommendation(agent, variance_data):
         return response.text.strip()
     except Exception as e:
         error_str = str(e)
-        if "503" in error_str:
-            print("Gemini 503 persists in Agent 6. Falling back to Groq...")
+        if "503" in error_str or "429" in error_str:
+            print("Gemini unavailable in Agent 6. Falling back to Groq...")
             try:
                 from app.tools.groq_fallback import call_groq_api
                 return call_groq_api(prompt, is_json=False).strip()

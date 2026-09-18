@@ -31,8 +31,8 @@ def enrich_lesson_plan(agent, draft_plan, course_outcomes, reference_materials):
         return json.loads(content)
     except Exception as e:
         error_str = str(e)
-        if "503" in error_str:
-            print("Gemini 503 persists in Agent 5. Falling back to Groq...")
+        if "503" in error_str or "429" in error_str:
+            print("Gemini unavailable in Agent 5. Falling back to Groq...")
             try:
                 from app.tools.groq_fallback import call_groq_api
                 content = call_groq_api(prompt)

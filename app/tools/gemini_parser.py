@@ -23,17 +23,14 @@ def generate_with_fallback(client, contents, response_mime_type="application/jso
                 print(f"Model {model} failed: {e}")
                 last_error = e
                 error_str = str(e)
-                if "429" in error_str:
-                    print("Rate limit reached (429). Waiting 35 seconds before retrying...")
-                    time.sleep(35)
-                    continue
-                elif "503" in error_str:
-                    print("API Unavailable (503). Retrying once before Groq fallback...")
+                if "429" in error_str or "503" in error_str:
+                    error_code = "429" if "429" in error_str else "503"
+                    print(f"API Unavailable ({error_code}). Retrying once before Groq fallback...")
                     if attempt < 1:
                         time.sleep(2)
                         continue
                     else:
-                        print("Gemini 503 persists. Falling back to Groq...")
+                        print(f"Gemini {error_code} persists. Falling back to Groq...")
                         from app.tools.groq_fallback import fallback_parse_pdf_with_groq
                         if file_path and prompt_text:
                             class MockResponse:
