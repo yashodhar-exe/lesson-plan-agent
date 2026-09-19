@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { dotPulse } from 'ldrs';
+
+dotPulse.register();
 
 const Chat = ({ facultyId }) => {
   const [messages, setMessages] = useState([
@@ -56,16 +59,6 @@ const Chat = ({ facultyId }) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] bg-white rounded-xl shadow-sm border border-brand-light/50 overflow-hidden">
-      {/* Chat Header */}
-      <div className="p-4 border-b border-brand-light/50 bg-gray-50 flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center">
-          <span className="material-symbols-outlined text-[20px] text-brand-primary">smart_toy</span>
-        </div>
-        <div>
-          <h2 className="font-semibold text-brand-dark">AI Assistant</h2>
-          <p className="text-xs text-gray-500">Powered by Groq</p>
-        </div>
-      </div>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -73,8 +66,8 @@ const Chat = ({ facultyId }) => {
           <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className="flex items-start max-w-[80%] gap-3">
               {msg.role === 'ai' && (
-                <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="material-symbols-outlined text-[16px] text-brand-primary">smart_toy</span>
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <span className="material-symbols-outlined text-[16px] text-gray-500">smart_toy</span>
                 </div>
               )}
               
@@ -102,11 +95,13 @@ const Chat = ({ facultyId }) => {
         {isLoading && (
           <div className="flex justify-start">
             <div className="flex items-start max-w-[80%] gap-3">
-              <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                <span className="material-symbols-outlined text-[16px] text-brand-primary">smart_toy</span>
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="material-symbols-outlined text-[16px] text-gray-500">smart_toy</span>
               </div>
               <div className="py-2 text-gray-400 flex items-center space-x-2">
-                <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                <div className="flex items-center justify-center w-6 h-6">
+                  <l-dot-pulse size="24" speed="1.3" color="#9ca3af"></l-dot-pulse>
+                </div>
                 <span className="text-sm">Thinking...</span>
               </div>
             </div>

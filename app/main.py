@@ -198,6 +198,7 @@ def get_faculty_workload(faculty_id: str, db: Session = Depends(get_db)):
         assignments[key] = assignments.get(key, 0) + 1
         
     section_reports = []
+    plan_ids = []
     for (cid, sid), count in assignments.items():
         course = db.query(models.Course).filter(models.Course.id == cid).first()
         section = db.query(models.Section).filter(models.Section.id == sid).first()
@@ -207,6 +208,7 @@ def get_faculty_workload(faculty_id: str, db: Session = Depends(get_db)):
         target_sessions = 0
         completed_sessions = 0
         if plan:
+            plan_ids.append(plan.id)
             sessions = db.query(models.LessonSession).filter(models.LessonSession.lesson_plan_id == plan.id).all()
             target_sessions = len(sessions)
             completed_sessions = len([s for s in sessions if s.status == "COMPLETED"])
@@ -222,26 +224,31 @@ def get_faculty_workload(faculty_id: str, db: Session = Depends(get_db)):
         })
         
     next_class = None
-    for slot in slots:
-        if next_class: break
-        plan = db.query(models.LessonPlan).filter(models.LessonPlan.course_id == slot.course_id, models.LessonPlan.section_id == slot.section_id).first()
-        if plan:
-            session = db.query(models.LessonSession).filter(models.LessonSession.lesson_plan_id == plan.id, models.LessonSession.status == "PLANNED").order_by(models.LessonSession.session_number).first()
-            if session:
-                course = db.query(models.Course).filter(models.Course.id == slot.course_id).first()
-                section = db.query(models.Section).filter(models.Section.id == slot.section_id).first()
-                topic_name = "Buffer Session"
-                if session.topic_id:
-                    topic = db.query(models.Topic).filter(models.Topic.id == session.topic_id).first()
-                    if topic: topic_name = topic.name
-                next_class = {
-                    "course_name": course.name if course else "",
-                    "section_name": section.name if section else "",
-                    "topic_name": topic_name,
-                    "teaching_method": session.teaching_method,
-                    "date": session.date.isoformat() if session.date else None,
-                    "period": session.period
-                }
+    if plan_ids:
+        from datetime import date
+        today = date.today()
+        next_session = db.query(models.LessonSession).filter(
+            models.LessonSession.lesson_plan_id.in_(plan_ids),
+            models.LessonSession.status == "PLANNED",
+            models.LessonSession.date >= today
+        ).order_by(models.LessonSession.date, models.LessonSession.period).first()
+        
+        if next_session:
+            plan = db.query(models.LessonPlan).filter(models.LessonPlan.id == next_session.lesson_plan_id).first()
+            course = db.query(models.Course).filter(models.Course.id == plan.course_id).first() if plan else None
+            section = db.query(models.Section).filter(models.Section.id == plan.section_id).first() if plan else None
+            topic_name = "Buffer Session"
+            if next_session.topic_id:
+                topic = db.query(models.Topic).filter(models.Topic.id == next_session.topic_id).first()
+                if topic: topic_name = topic.name
+            next_class = {
+                "course_name": course.name if course else "",
+                "section_name": section.name if section else "",
+                "topic_name": topic_name,
+                "teaching_method": next_session.teaching_method,
+                "date": next_session.date.isoformat() if next_session.date else None,
+                "period": next_session.period
+            }
 
     return {
         "total_periods_per_week": len(slots),

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const Calendar = ({ facultyId }) => {
   const [sessions, setSessions] = useState([]);
+  const [holidays, setHolidays] = useState([]);
   const [loading, setLoading] = useState(true);
   const [weekOffset, setWeekOffset] = useState(0);
   
@@ -39,6 +40,16 @@ const Calendar = ({ facultyId }) => {
 
   useEffect(() => {
     if (!facultyId) return;
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/calendar/2026-27-1`)
+      .then(res => res.json())
+      .then(data => {
+         const hols = data.filter(e => e.event_type === "HOLIDAY").map(e => {
+            return e.date ? e.date.split("T")[0] : "";
+         });
+         setHolidays(hols);
+      })
+      .catch(e => console.error(e));
     
     fetch(`${import.meta.env.VITE_API_URL}/api/faculty/${facultyId}/workload`)
       .then(res => res.json())
@@ -139,6 +150,16 @@ const Calendar = ({ facultyId }) => {
                         const sessionMatch = sessions.find(s => s.period === slot.period && s.date === day.dateStr);
                         const isLastDay = idx === 5;
                         const borderClasses = isLastDay ? 'border-b border-brand-border/30' : 'border-r border-b border-brand-border/30';
+                        const isHoliday = holidays.includes(day.dateStr);
+
+                        if (isHoliday) {
+                           return (
+                             <div key={idx} className={`p-2 ${borderClasses} bg-brand-surface/20 flex flex-col items-center justify-center opacity-70 border-dashed`}>
+                               <span className="material-symbols-outlined text-brand-muted mb-1">celebration</span>
+                               <span className="text-[10px] font-bold text-brand-muted tracking-wider">HOLIDAY</span>
+                             </div>
+                           );
+                        }
 
                         if (!sessionMatch) {
                            return <EmptyCell key={idx} customClass={borderClasses} />;
