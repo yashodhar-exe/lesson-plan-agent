@@ -5,6 +5,7 @@ import AnimatedAscii from './AnimatedAscii';
 const Auth = ({ onAuthSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [mode, setMode] = useState('signin'); // 'signin' or 'signup'
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -19,16 +20,17 @@ const Auth = ({ onAuthSuccess }) => {
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email,
-          password: 'dummy_password_123', // Magic links don't require password, but we're just doing email sign in. Actually, let's use OTP / magic link.
+          password,
         });
         if (error) throw error;
-        setMessage('Check your email for the login link!');
+        setMessage('Check your email to confirm your account!');
       } else {
-        const { error } = await supabase.auth.signInWithOtp({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
+          password,
         });
         if (error) throw error;
-        setMessage('Check your email for the login link!');
+        setMessage('Successfully signed in!');
       }
     } catch (err) {
       setError(err.message);
@@ -97,6 +99,14 @@ const Auth = ({ onAuthSuccess }) => {
               required
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm transition-all"
             />
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm transition-all"
+            />
 
             {message && <div className="text-sm text-green-600 text-center">{message}</div>}
             {error && <div className="text-sm text-red-600 text-center">{error}</div>}
@@ -109,7 +119,7 @@ const Auth = ({ onAuthSuccess }) => {
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <l-chaotic-orbit size="20" speed="1.5" color="white"></l-chaotic-orbit>
-                  <span>Sending...</span>
+                  <span>{mode === 'signin' ? 'Signing in...' : 'Signing up...'}</span>
                 </div>
               ) : (mode === 'signin' ? 'Sign in with email' : 'Sign up with email')}
             </button>
