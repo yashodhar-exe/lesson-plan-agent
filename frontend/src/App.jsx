@@ -16,7 +16,7 @@ function App() {
 
   const [session, setSession] = useState(null);
   const [currentView, setCurrentView] = useState('dashboard');
-  
+
   const [faculty, setFaculty] = useState(null);
 
   useEffect(() => {
@@ -65,13 +65,13 @@ function App() {
       <div className="print:hidden">
         <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
       </div>
-      
+
       {/* Main Content Area */}
       <div className="flex-1 ml-56 print:ml-0 flex flex-col min-h-screen">
         <div className="print:hidden">
           <Header faculty={faculty} session={session} />
         </div>
-        
+
         <main className="flex-1 p-10 print:p-0 print:bg-white">
           <div className="max-w-6xl mx-auto">
             {currentView === 'dashboard' && <Dashboard facultyId={faculty?.id} faculty={faculty} setCurrentView={setCurrentView} />}

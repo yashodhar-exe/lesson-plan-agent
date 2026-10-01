@@ -11,6 +11,7 @@ const Settings = ({ faculty, session, onFacultyUpdate }) => {
   const [saveMessage, setSaveMessage] = useState("");
 
   const [formData, setFormData] = useState({
+    name: faculty?.name || 'Faculty Member',
     designation: faculty?.designation || 'Professor',
     academic_affiliation: faculty?.academic_affiliation || 'Autonomous Board of Studies (BOS) Member',
     default_academic_term: faculty?.default_academic_term || 'CSE Sem I 2026–27 (Active)',
@@ -26,6 +27,7 @@ const Settings = ({ faculty, session, onFacultyUpdate }) => {
   useEffect(() => {
     if (faculty) {
       setFormData({
+        name: faculty.name || 'Faculty Member',
         designation: faculty.designation || 'Professor',
         academic_affiliation: faculty.academic_affiliation || 'Autonomous Board of Studies (BOS) Member',
         default_academic_term: faculty.default_academic_term || 'CSE Sem I 2026–27 (Active)',
@@ -107,7 +109,7 @@ const Settings = ({ faculty, session, onFacultyUpdate }) => {
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Faculty Name</label>
-                  <input className="h-9 px-3 bg-brand-surface border border-brand-border rounded-lg text-sm text-brand-text cursor-not-allowed focus:ring-0" readOnly type="text" value={faculty?.name || "Faculty Member"} />
+                  <input className="h-9 px-3 bg-white border border-brand-border rounded-lg text-sm text-brand-text focus:border-brand-primary focus:outline-none" type="text" value={formData.name} onChange={e => handleChange('name', e.target.value)} />
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs font-semibold text-brand-secondary uppercase tracking-wider mb-1">Designation</label>
@@ -283,6 +285,7 @@ const Settings = ({ faculty, session, onFacultyUpdate }) => {
               // Revert to faculty props
               if (faculty) {
                 setFormData({
+                  name: faculty.name || 'Faculty Member',
                   designation: faculty.designation || 'Professor',
                   academic_affiliation: faculty.academic_affiliation || 'Autonomous Board of Studies (BOS) Member',
                   default_academic_term: faculty.default_academic_term || 'CSE Sem I 2026–27 (Active)',
