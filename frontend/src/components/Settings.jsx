@@ -54,7 +54,7 @@ const Settings = ({ faculty, session, onFacultyUpdate }) => {
     setIsSaving(true);
     setSaveMessage("");
     try {
-      const res = await fetch(`http://localhost:8000/api/faculty/${faculty.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/faculty/${faculty.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

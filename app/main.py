@@ -152,7 +152,8 @@ def sync_faculty(faculty_data: FacultySync, db: Session = Depends(get_db)):
         db.add(faculty)
     else:
         faculty.email = faculty_data.email
-        faculty.name = faculty_data.name
+        if not faculty.name:  # Only set it if they don't have one
+            faculty.name = faculty_data.name
     db.commit()
     db.refresh(faculty)
     return {"id": faculty.id, "name": faculty.name, "email": faculty.email}
